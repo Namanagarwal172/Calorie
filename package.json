@@ -1,0 +1,11 @@
+{
+  "name": "health-ai-india",
+  "version": "1.0.0",
+  "description": "Full-stack Health AI calorie tracker for Indian users",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "license": "MIT"
+}
