@@ -1,5 +1,6 @@
 # Health AI 🇮🇳 (Full-Stack)
 
+Health AI is a full-stack calorie and nutrition tracking app inspired by CAL AI, redesigned in a **Gen-Z style mobile-first UI** for Indian users.
 Health AI is a full-stack calorie and nutrition tracking app inspired by CAL AI, designed for Indian customers and food habits.
 
 ## What makes it Indian-first
@@ -7,6 +8,14 @@ Health AI is a full-stack calorie and nutrition tracking app inspired by CAL AI,
 - INR-based daily food budget tracking and meal budget tip.
 - Localized coaching tone in AI insights (Hindi + English style).
 - Starter barcode examples relevant to Indian products.
+
+## Gen-Z UI Highlights
+- Mobile-first glassmorphism interface with gradients.
+- Login screen with mobile/email toggle flow.
+- Greeting + remaining calories + streak badge.
+- Progress rings for Calories, Protein, Carbs, Water.
+- Visual sections: AI Coach, Scan Meal, Budget Tracker, Quick Add, Timeline.
+- Sticky bottom action bar for hydration and logout.
 
 ## Full-stack architecture
 - **Backend:** Node.js HTTP API (`server.js`) with JSON data persistence in `data/db.json`.
@@ -28,6 +37,19 @@ npm start
 ```
 Open: <http://localhost:4173>
 
+## Test
+```bash
+npm test
+```
+
+## Run with custom port/db
+```bash
+PORT=5000 DB_FILE=./data/db.json node server.js
+```
+
+## Input validation
+- Invalid JSON requests return `400 Invalid JSON payload`.
+- Invalid meal or water payloads return `400` with a clear error message.
 ## Preview option
 In the **AI Meal Scan** card:
 1. Upload meal photo and enter note.
