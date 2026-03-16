@@ -12,6 +12,10 @@ const els = {
   googleLogin: document.getElementById('googleLogin'),
   appleLogin: document.getElementById('appleLogin'),
   authError: document.getElementById('authError'),
+  otpField: document.getElementById('otpField'),
+  otpInput: document.getElementById('otpInput'),
+  continueBtn: document.getElementById('continueBtn'),
+  verifyOtpBtn: document.getElementById('verifyOtpBtn'),
 
   scanForm: document.getElementById('scanForm'),
   previewScan: document.getElementById('previewScan'),
@@ -55,6 +59,7 @@ const els = {
 let pendingScanEstimate = null;
 let authMode = 'mobile';
 let memoryAuth = false;
+let pendingLoginId = '';
 
 function isLoggedIn() {
   try {
@@ -159,6 +164,9 @@ function setMode(mode) {
   els.tabEmail.classList.toggle('active', !isMobile);
   els.mobileField.classList.toggle('hidden', !isMobile);
   els.emailField.classList.toggle('hidden', isMobile);
+  els.otpField?.classList.add('hidden');
+  if (els.verifyOtpBtn) els.verifyOtpBtn.classList.add('hidden');
+  if (els.continueBtn) els.continueBtn.classList.remove('hidden');
 }
 
 els.tabMobile.addEventListener('click', () => setMode('mobile'));
@@ -179,6 +187,7 @@ els.appleLogin?.addEventListener('click', () => {
 });
 
 
+els.authForm.addEventListener('submit', async (e) => {
 els.authForm.addEventListener('submit', (e) => {
   e.preventDefault();
   const f = new FormData(e.target);
@@ -187,6 +196,37 @@ els.authForm.addEventListener('submit', (e) => {
     if (els.authError) els.authError.textContent = `Please enter your ${authMode}.`;
     return;
   }
+  try {
+    const login = await api('/api/login', { method: 'POST', body: authMode === 'mobile' ? { mobile: value } : { email: value } });
+    pendingLoginId = login.loginId;
+    if (els.authError) els.authError.textContent = `OTP sent. Use demo OTP: ${login.otp}`;
+    els.otpField?.classList.remove('hidden');
+    if (els.continueBtn) els.continueBtn.classList.add('hidden');
+    if (els.verifyOtpBtn) els.verifyOtpBtn.classList.remove('hidden');
+  } catch (err) {
+    if (els.authError) els.authError.textContent = err.message;
+  }
+});
+
+els.verifyOtpBtn?.addEventListener('click', async () => {
+  const otp = String(els.otpInput?.value || '').trim();
+  if (!otp) {
+    if (els.authError) els.authError.textContent = 'Please enter OTP.';
+    return;
+  }
+  try {
+    await api('/api/login/verify', { method: 'POST', body: { loginId: pendingLoginId, otp } });
+    if (els.authError) els.authError.textContent = '';
+    setLoggedIn(true);
+    updateAuthUI();
+    await refresh();
+  } catch (err) {
+    if (els.authError) els.authError.textContent = err.message;
+  }
+});
+
+els.logoutBtn.addEventListener('click', () => {
+  setLoggedIn(false);
   if (els.authError) els.authError.textContent = '';
   setLoggedIn(true);
   updateAuthUI();

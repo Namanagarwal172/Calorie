@@ -178,5 +178,17 @@ test('scan-photo and login endpoints work', async () => {
   });
   assert.equal(loginRes.status, 200);
   const login = await loginRes.json();
+  assert.equal(login.otpRequired, true);
+  assert.equal(login.otp, '123456');
+  assert.ok(login.loginId);
+
+  const verifyRes = await fetch(`${BASE}/api/login/verify`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ loginId: login.loginId, otp: '123456' }),
+  });
+  assert.equal(verifyRes.status, 200);
+  const verified = await verifyRes.json();
+  assert.equal(verified.token, 'demo-token');
   assert.equal(login.token, 'demo-token');
 });

@@ -23,6 +23,8 @@ const MIME = {
   '.svg': 'image/svg+xml',
 };
 
+const loginSessions = new Map();
+
 const barcodeDb = {
   '890123': { name: 'Amul Protein Lassi', calories: 180, protein: 15, carbs: 16, fat: 5, mealType: 'Snack' },
   '901234': { name: 'Britannia NutriChoice', calories: 140, protein: 3, carbs: 20, fat: 5, mealType: 'Snack' },
@@ -296,6 +298,25 @@ function createServer() {
 
       if (pathname === '/api/login' && req.method === 'POST') {
         const body = await parseBody(req);
+        const identifier = String(body.email || body.mobile || '').trim();
+        if (!identifier) return send(res, 400, { error: 'Email or mobile required' });
+        const loginId = randomUUID();
+        const otp = '123456';
+        loginSessions.set(loginId, { identifier, otp, createdAt: Date.now() });
+        return send(res, 200, {
+          message: 'OTP sent (demo)',
+          otpRequired: true,
+          otp,
+          loginId,
+        });
+      }
+
+      if (pathname === '/api/login/verify' && req.method === 'POST') {
+        const body = await parseBody(req);
+        const session = loginSessions.get(String(body.loginId || ''));
+        if (!session) return send(res, 400, { error: 'Invalid login session' });
+        if (String(body.otp || '') !== session.otp) return send(res, 400, { error: 'Invalid OTP' });
+        loginSessions.delete(String(body.loginId));
         if (!body.email && !body.mobile) return send(res, 400, { error: 'Email or mobile required' });
         return send(res, 200, { message: 'Login successful', token: 'demo-token' });
       }
