@@ -40,6 +40,16 @@ const els = {
   ringProteinText: document.getElementById('ringProteinText'),
   ringCarbsText: document.getElementById('ringCarbsText'),
   ringWaterText: document.getElementById('ringWaterText'),
+
+  chatInput: document.getElementById('chatInput'),
+  chatSend: document.getElementById('chatSend'),
+  voiceBtn: document.getElementById('voiceBtn'),
+  chatBox: document.getElementById('chatBox'),
+  scanPhotoBtn: document.getElementById('scanPhotoBtn'),
+  dietForm: document.getElementById('dietForm'),
+  dietPlanBox: document.getElementById('dietPlanBox'),
+  loadWeekly: document.getElementById('loadWeekly'),
+  weeklyBox: document.getElementById('weeklyBox'),
 };
 
 let pendingScanEstimate = null;
@@ -111,6 +121,29 @@ function formatCurrency(value) {
 function estimateMealCost(meal) {
   return Math.round((Number(meal.calories || 0) * 0.16) + 20);
 }
+function appendChat(line) {
+  if (!els.chatBox) return;
+  els.chatBox.innerHTML += `<p>${line}</p>`;
+  els.chatBox.scrollTop = els.chatBox.scrollHeight;
+}
+
+function speak(text) {
+  if (!('speechSynthesis' in window)) return;
+  const utterance = new SpeechSynthesisUtterance(text);
+  window.speechSynthesis.speak(utterance);
+}
+
+async function sendChatMessage(message) {
+  const msg = String(message || '').trim();
+  if (!msg) return;
+  appendChat(`You: ${msg}`);
+  const data = await api('/api/chat', { method: 'POST', body: { message: msg } });
+  appendChat(`Coach: ${data.reply}`);
+  speak(data.reply);
+}
+
+function updateAuthUI() {
+  const loggedIn = isLoggedIn();
 
 function updateAuthUI() {
   const loggedIn = isLoggedIn();
@@ -345,6 +378,63 @@ els.barcodeForm.addEventListener('submit', async (e) => {
     const meal = await api('/api/barcode', { method: 'POST', body: { code: f.get('code') } });
     els.barcodeStatus.textContent = `Added ${meal.name}`;
     els.barcodeForm.reset();
+    await refresh();
+  } catch (err) {
+    els.barcodeStatus.textContent = err.message;
+  }
+});
+
+els.addWater.addEventListener('click', async () => {
+  await api('/api/water/add', { method: 'POST', body: { amount: 250 } });
+  await refresh();
+});
+
+els.chatSend?.addEventListener('click', async () => {
+  try {
+    await sendChatMessage(els.chatInput.value);
+    els.chatInput.value = '';
+  } catch (e) {
+    appendChat(`Coach: ${e.message}`);
+  }
+});
+
+els.voiceBtn?.addEventListener('click', () => {
+  const Rec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!Rec) {
+    appendChat('Coach: Voice recognition not supported in this browser.');
+    return;
+  }
+  const recognition = new Rec();
+  recognition.onresult = async (event) => {
+    const speech = event.results[0][0].transcript;
+    await sendChatMessage(speech);
+  };
+  recognition.start();
+});
+
+els.scanPhotoBtn?.addEventListener('click', async () => {
+  const data = await api('/api/scan-photo', { method: 'POST', body: {} });
+  appendChat(`Coach: Photo scan -> ${data.name} (${data.calories} kcal, ${data.protein}g protein)`);
+});
+
+els.dietForm?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const f = new FormData(els.dietForm);
+  const plan = await api('/api/diet-plan', {
+    method: 'POST',
+    body: {
+      weight: Number(f.get('weight')),
+      goal: String(f.get('goal')),
+      budget: Number(f.get('budget')),
+    },
+  });
+  els.dietPlanBox.innerHTML = `<p><b>Target:</b> ${plan.targetCalories} kcal</p>` +
+    (plan.meals?.map((m) => `<p>• ${m.name} — ${m.calories} kcal, ${m.protein}g protein, ₹${m.price}</p>`).join('') || '<p>No meals found for this budget/goal.</p>');
+});
+
+els.loadWeekly?.addEventListener('click', async () => {
+  const weekly = await api('/api/analytics/weekly');
+  els.weeklyBox.innerHTML = weekly.map((d) => `<p>${d.day}: <b>${d.calories}</b> kcal</p>`).join('');
   e.target.reset();
   await refresh();
 });

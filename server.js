@@ -222,6 +222,54 @@ function normalizeMeal(body) {
   };
 }
 
+
+function chatbotReply(message = '') {
+  const m = String(message).toLowerCase();
+  if (m.includes('protein')) return 'You should aim for about 1.5 to 2 grams of protein per kg body weight.';
+  if (m.includes('breakfast')) return 'Healthy breakfast: oats, eggs, idli sambar or fruit with yogurt.';
+  if (m.includes('biryani')) return 'Chicken biryani usually has around 700 calories.';
+  if (m.includes('diet')) return 'Focus on high protein, balanced carbs and less fried food.';
+  return 'Ask me about calories, diet plans, protein intake or healthy meals.';
+}
+
+function generateDietPlan(weight, goal, budget) {
+  const w = toNumber(weight, 60);
+  const b = toNumber(budget, 300);
+  let calories = w * 25;
+  if (goal === 'fat_loss') calories = w * 22;
+  if (goal === 'muscle_gain') calories = w * 30;
+
+  const options = [
+    { name: 'Dal Rice', calories: 520, protein: 18, price: 60 },
+    { name: 'Paneer Roti', calories: 600, protein: 28, price: 120 },
+    { name: 'Egg Bhurji', calories: 400, protein: 25, price: 80 },
+    { name: 'Idli Sambar', calories: 340, protein: 12, price: 50 },
+  ];
+
+  const meals = [];
+  let total = 0;
+  for (const meal of options) {
+    if (meal.price <= b && total + meal.calories <= calories) {
+      meals.push(meal);
+      total += meal.calories;
+    }
+  }
+  return { targetCalories: Math.round(calories), meals };
+}
+
+function weeklyAnalytics() {
+  return [
+    { day: 'Mon', calories: 1800 },
+    { day: 'Tue', calories: 2000 },
+    { day: 'Wed', calories: 1700 },
+    { day: 'Thu', calories: 2100 },
+    { day: 'Fri', calories: 1900 },
+    { day: 'Sat', calories: 2200 },
+    { day: 'Sun', calories: 2000 },
+  ];
+}
+
+function serveStatic(res, pathname) {
 function serveStatic(res, pathname) {
 function serveStatic(req, res, pathname) {
   const filePath = pathname === '/' ? path.join(ROOT, 'index.html') : path.join(ROOT, pathname);
@@ -245,6 +293,30 @@ function createServer() {
 
     try {
       if (pathname === '/api/health' && req.method === 'GET') return send(res, 200, { ok: true });
+
+      if (pathname === '/api/login' && req.method === 'POST') {
+        const body = await parseBody(req);
+        if (!body.email && !body.mobile) return send(res, 400, { error: 'Email or mobile required' });
+        return send(res, 200, { message: 'Login successful', token: 'demo-token' });
+      }
+
+      if (pathname === '/api/analytics/weekly' && req.method === 'GET') {
+        return send(res, 200, weeklyAnalytics());
+      }
+
+      if (pathname === '/api/scan-photo' && req.method === 'POST') {
+        return send(res, 200, { name: 'Paneer Curry', calories: 600, protein: 28, carbs: 40, fat: 24 });
+      }
+
+      if (pathname === '/api/chat' && req.method === 'POST') {
+        const body = await parseBody(req);
+        return send(res, 200, { reply: chatbotReply(body.message || '') });
+      }
+
+      if (pathname === '/api/diet-plan' && req.method === 'POST') {
+        const body = await parseBody(req);
+        return send(res, 200, generateDietPlan(body.weight, body.goal, body.budget));
+      }
 
       if (pathname === '/api/profile' && req.method === 'GET') return send(res, 200, dbRead().profile);
 
@@ -296,6 +368,8 @@ function createServer() {
 
       if (pathname === '/api/scan' && req.method === 'POST') {
         const body = await parseBody(req);
+        const text = `${body.fileName || ''} ${body.note || ''} ${body.food || ''}`;
+        return send(res, 200, estimateFromText(text));
         return send(res, 200, estimateFromText(`${body.fileName || ''} ${body.note || ''}`));
       }
 

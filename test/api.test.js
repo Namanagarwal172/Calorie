@@ -133,3 +133,50 @@ test('invalid water amount is rejected with 400', async () => {
   const payload = await res.json();
   assert.equal(payload.error, 'amount must be a positive number');
 });
+
+
+test('chat, diet plan and weekly analytics endpoints work', async () => {
+  const chatRes = await fetch(`${BASE}/api/chat`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message: 'how much protein?' }),
+  });
+  assert.equal(chatRes.status, 200);
+  const chat = await chatRes.json();
+  assert.ok(chat.reply.toLowerCase().includes('protein'));
+
+  const planRes = await fetch(`${BASE}/api/diet-plan`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ weight: 70, goal: 'fat_loss', budget: 120 }),
+  });
+  assert.equal(planRes.status, 200);
+  const plan = await planRes.json();
+  assert.ok(plan.targetCalories > 0);
+  assert.ok(Array.isArray(plan.meals));
+
+  const weeklyRes = await fetch(`${BASE}/api/analytics/weekly`);
+  assert.equal(weeklyRes.status, 200);
+  const weekly = await weeklyRes.json();
+  assert.equal(weekly.length, 7);
+});
+
+test('scan-photo and login endpoints work', async () => {
+  const photoRes = await fetch(`${BASE}/api/scan-photo`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({}),
+  });
+  assert.equal(photoRes.status, 200);
+  const photo = await photoRes.json();
+  assert.ok(photo.name);
+
+  const loginRes = await fetch(`${BASE}/api/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: 'demo@example.com' }),
+  });
+  assert.equal(loginRes.status, 200);
+  const login = await loginRes.json();
+  assert.equal(login.token, 'demo-token');
+});
