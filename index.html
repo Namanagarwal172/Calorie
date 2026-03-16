@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Health AI India - Fitness Style</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="bg-glow"></div>
+
+  <main class="phone-shell">
+    <section id="authView" class="auth-wrap card">
+      <h1>Health AI <span>🇮🇳</span></h1>
+      <p class="muted">Your smart nutrition + fitness companion</p>
+
+      <div class="segmented">
+        <button id="tabMobile" class="tab active" type="button">Mobile</button>
+        <button id="tabEmail" class="tab" type="button">Email</button>
+      </div>
+
+      <form id="authForm" class="stack">
+        <label id="mobileField">Mobile Number
+          <input name="mobile" type="tel" placeholder="+91 98765 43210" />
+        </label>
+        <label id="emailField" class="hidden">Email
+          <input name="email" type="email" placeholder="you@example.com" />
+        </label>
+        <label id="otpField" class="hidden">Enter OTP
+          <input id="otpInput" name="otp" type="text" placeholder="123456" />
+        </label>
+        <button id="continueBtn" class="btn btn-primary" type="submit">Send OTP</button>
+        <button id="verifyOtpBtn" class="btn hidden" type="button">Verify OTP</button>
+      </form>
+
+      <p class="small muted">or continue with</p>
+      <div class="split">
+        <button class="btn" id="googleLogin" type="button">Google</button>
+        <button class="btn" id="appleLogin" type="button">Apple</button>
+      </div>
+      <p id="authError" class="small error-text"></p>
+    </section>
+
+    <section id="appView" class="app-wrap hidden">
+      <header class="top-hero card">
+        <div>
+          <p class="muted small">Daily Summary</p>
+          <h2 id="greeting">Good Morning 👋</h2>
+          <p id="kcalLine" class="muted">You have 0 kcal remaining today</p>
+        </div>
+        <div class="streak-badge">🔥 <span id="streakCount">0</span>d</div>
+      </header>
+
+      <section class="metrics-grid">
+        <article class="metric card"><h3>Calories</h3><div class="ring" id="ringCalories"></div><span id="ringCaloriesText">0/0</span></article>
+        <article class="metric card"><h3>Protein</h3><div class="ring" id="ringProtein"></div><span id="ringProteinText">0/0</span></article>
+        <article class="metric card"><h3>Carbs</h3><div class="ring" id="ringCarbs"></div><span id="ringCarbsText">0/0</span></article>
+        <article class="metric card"><h3>Water</h3><div class="ring" id="ringWater"></div><span id="ringWaterText">0ml</span></article>
+      </section>
+
+      <section class="card">
+        <h3>🤖 AI Coach</h3>
+        <div id="insights" class="content-box"></div>
+      </section>
+
+      <section class="card">
+        <h3>📸 AI Meal Scan</h3>
+        <form id="scanForm" class="stack">
+          <label>Photo <input name="image" type="file" accept="image/*" required /></label>
+          <label>Meal Note <input name="note" placeholder="e.g. paneer tikka" required /></label>
+          <label>Meal Type
+            <select name="mealType">
+              <option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Snack</option>
+            </select>
+          </label>
+          <div class="split">
+            <button id="previewScan" class="btn" type="button">Preview</button>
+            <button id="addFromPreview" class="btn btn-primary" type="submit">Add Meal</button>
+          </div>
+        </form>
+        <div id="scanResult" class="content-box"></div>
+      </section>
+
+      <section class="split">
+        <section class="card">
+          <h3>💸 Budget</h3>
+          <p><b id="spentInr">₹0</b> spent</p>
+          <p class="muted"><span id="remainingInr">₹0</span> remaining</p>
+        </section>
+        <section class="card">
+          <h3>📊 Weekly</h3>
+          <button id="loadWeekly" class="btn" type="button">Load</button>
+          <div id="weeklyBox" class="content-box"></div>
+        </section>
+      </section>
+
+      <section class="card">
+        <h3>🧠 Nutrition Coach Chat</h3>
+        <div class="split">
+          <input id="chatInput" placeholder="Ask calories, protein, diet..." />
+          <button id="chatSend" class="btn">Ask</button>
+        </div>
+        <div class="split mt8">
+          <button id="voiceBtn" class="btn" type="button">🎤 Voice</button>
+          <button id="scanPhotoBtn" class="btn" type="button">📷 Scan Photo</button>
+        </div>
+        <div id="chatBox" class="content-box"></div>
+      </section>
+
+      <section class="card">
+        <h3>🥗 Diet Plan Generator</h3>
+        <form id="dietForm" class="stack">
+          <div class="split">
+            <label>Weight<input name="weight" type="number" min="30" value="70" required /></label>
+            <label>Budget<input name="budget" type="number" min="50" value="120" required /></label>
+          </div>
+          <label>Goal
+            <select name="goal">
+              <option value="maintenance">Maintenance</option>
+              <option value="fat_loss">Fat Loss</option>
+              <option value="muscle_gain">Muscle Gain</option>
+            </select>
+          </label>
+          <button class="btn btn-primary" type="submit">Generate</button>
+        </form>
+        <div id="dietPlanBox" class="content-box"></div>
+      </section>
+
+      <section class="card">
+        <h3>⚡ Quick Add</h3>
+        <form id="barcodeForm" class="split">
+          <input name="code" placeholder="Barcode e.g. 890123" required />
+          <button class="btn" type="submit">Add</button>
+        </form>
+        <p id="barcodeStatus" class="muted"></p>
+
+        <form id="manualForm" class="stack">
+          <label>Food Name<input name="name" placeholder="Rajma Chawal" required /></label>
+          <div class="split">
+            <label>Calories<input name="calories" type="number" min="1" required /></label>
+            <label>Protein<input name="protein" type="number" min="0" value="0" /></label>
+          </div>
+          <div class="split">
+            <label>Carbs<input name="carbs" type="number" min="0" value="0" /></label>
+            <label>Fat<input name="fat" type="number" min="0" value="0" /></label>
+          </div>
+          <label>Meal Type
+            <select name="mealType"><option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Snack</option></select>
+          </label>
+          <button class="btn btn-primary" type="submit">Add Manual Meal</button>
+        </form>
+      </section>
+
+      <section class="card">
+        <h3>🍽️ Timeline</h3>
+        <ul id="mealList" class="meal-list"></ul>
+      </section>
+
+      <footer class="bottom-actions card">
+        <button id="addWater" class="btn btn-primary">+250ml Water</button>
+        <button id="logoutBtn" class="btn" type="button">Logout</button>
+      </footer>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
