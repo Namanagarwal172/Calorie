@@ -17,6 +17,8 @@
       <div class="segmented">
         <button id="tabMobile" class="tab active" type="button">Mobile</button>
         <button id="tabEmail" class="tab" type="button">Email</button>
+        <button id="tabMobile" class="tab active">Mobile</button>
+        <button id="tabEmail" class="tab">Email</button>
       </div>
 
       <form id="authForm" class="stack">
@@ -35,6 +37,9 @@
         <button class="btn ghost" id="appleLogin" type="button">Apple</button>
       </div>
       <p id="authError" class="muted small center"></p>
+        <button class="btn ghost" type="button">Google</button>
+        <button class="btn ghost" type="button">Apple</button>
+      </div>
     </section>
 
     <section id="appView" class="screen hidden">
@@ -76,6 +81,53 @@
         <form id="scanForm" class="stack">
           <label>Meal Photo <input name="image" type="file" accept="image/*" required /></label>
           <label>Meal Note <input name="note" placeholder="e.g. paneer tikka" required /></label>
+  <title>Health AI India - Smart Calorie & Nutrition Tracker</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div>
+        <h1>Health AI 🇮🇳</h1>
+        <p class="subtitle">Full-stack AI nutrition coach for Indian food habits</p>
+        <p class="small" id="budgetTip"></p>
+      </div>
+    </header>
+
+    <main class="grid">
+      <section class="card">
+        <h2>Profile Setup</h2>
+        <form id="profileForm" class="stack">
+          <label>Name <input name="name" required placeholder="Aarav" /></label>
+          <label>City <input name="city" required placeholder="Mumbai" /></label>
+          <label>Daily Calorie Target <input name="calorieTarget" type="number" min="1000" value="2200" required /></label>
+          <label>Protein Goal (g) <input name="proteinGoal" type="number" min="30" value="120" required /></label>
+          <label>Carbs Goal (g) <input name="carbGoal" type="number" min="50" value="260" required /></label>
+          <label>Fat Goal (g) <input name="fatGoal" type="number" min="10" value="70" required /></label>
+          <label>Daily Food Budget (₹) <input name="budgetInr" type="number" min="50" value="300" required /></label>
+          <button class="primary-btn" type="submit">Save Profile</button>
+        </form>
+      </section>
+
+      <section class="card">
+        <h2>Today's Dashboard</h2>
+        <div id="todayStats" class="stats"></div>
+        <div class="macro-grid" id="macroBars"></div>
+        <div class="water-row">
+          <h3>Hydration</h3>
+          <div>
+            <button id="addWater" class="secondary-btn">+250ml</button>
+            <span id="waterStatus"></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>AI Meal Scan</h2>
+        <p class="small">Upload a meal image + note (e.g., "paneer", "idli", "biryani") for AI estimate.</p>
+        <form id="scanForm" class="stack">
+          <label>Meal Photo <input name="image" type="file" accept="image/*" required /></label>
+          <label>Meal Note <input name="note" placeholder="e.g. dal chawal" required /></label>
           <label>Meal Type
             <select name="mealType">
               <option>Breakfast</option>
@@ -87,6 +139,9 @@
           <div class="action-row">
             <button id="previewScan" class="btn" type="button">Preview</button>
             <button id="addFromPreview" class="btn gradient" type="submit">Add Meal</button>
+          <div class="scan-actions">
+            <button class="secondary-btn" type="button" id="previewScan">Preview Estimate</button>
+            <button class="primary-btn" type="submit" id="addFromPreview">Add From Preview</button>
           </div>
         </form>
         <div id="scanResult" class="result-box"></div>
@@ -114,6 +169,23 @@
             <label>Carbs <input name="carbs" type="number" min="0" value="0" /></label>
             <label>Fat <input name="fat" type="number" min="0" value="0" /></label>
           </div>
+      <section class="card">
+        <h2>Barcode Quick Add</h2>
+        <form id="barcodeForm" class="stack inline-form">
+          <input name="code" placeholder="Enter barcode e.g. 890123" required />
+          <button class="secondary-btn" type="submit">Lookup</button>
+        </form>
+        <p id="barcodeStatus" class="small"></p>
+      </section>
+
+      <section class="card">
+        <h2>Manual Food Entry</h2>
+        <form id="manualForm" class="stack">
+          <label>Food Name <input name="name" placeholder="Rajma Chawal" required /></label>
+          <label>Calories <input name="calories" type="number" min="1" required /></label>
+          <label>Protein (g) <input name="protein" type="number" min="0" value="0" /></label>
+          <label>Carbs (g) <input name="carbs" type="number" min="0" value="0" /></label>
+          <label>Fat (g) <input name="fat" type="number" min="0" value="0" /></label>
           <label>Meal Type
             <select name="mealType">
               <option>Breakfast</option>
@@ -137,6 +209,21 @@
       </footer>
     </section>
   </main>
+          <button class="primary-btn" type="submit">Add Meal</button>
+        </form>
+      </section>
+
+      <section class="card">
+        <h2>Meal Timeline</h2>
+        <ul id="mealList" class="meal-list"></ul>
+      </section>
+
+      <section class="card wide">
+        <h2>AI Insights</h2>
+        <div id="insights" class="insight-box"></div>
+      </section>
+    </main>
+  </div>
 
   <script src="app.js"></script>
 </body>
