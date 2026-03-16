@@ -228,6 +228,12 @@ function serveStatic(req, res, pathname) {
   if (!filePath.startsWith(ROOT)) return send(res, 403, 'Forbidden', { 'Content-Type': 'text/plain' });
   fs.readFile(filePath, (err, data) => {
     if (err) return send(res, 404, 'Not Found', { 'Content-Type': 'text/plain' });
+    send(res, 200, data, {
+      'Content-Type': MIME[path.extname(filePath)] || 'application/octet-stream',
+      'Cache-Control': 'no-store, no-cache, must-revalidate',
+      Pragma: 'no-cache',
+      Expires: '0',
+    });
     send(res, 200, data, { 'Content-Type': MIME[path.extname(filePath)] || 'application/octet-stream' });
   });
 }

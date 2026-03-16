@@ -22,6 +22,14 @@ Health AI is a full-stack calorie and nutrition tracking app inspired by CAL AI,
 - **Frontend:** Vanilla HTML/CSS/JS (`index.html`, `styles.css`, `app.js`) consuming backend APIs.
 - **Storage:** File-based persistence for profile, meals, and hydration data.
 
+## Instant fix for `npm ERR! EJSONPARSE`
+If `npm start` fails due to a broken `package.json`, run this one command:
+
+```bash
+bash scripts/repair-and-run.sh
+```
+
+This will auto-repair `package.json`, install dependencies, and start the app.
 ## Features
 - Profile setup: name, city, calorie goal, macro goals, daily INR budget.
 - AI meal scan simulation from image filename + meal note, with a dedicated **Preview Estimate** step before adding.
@@ -50,6 +58,62 @@ PORT=5000 DB_FILE=./data/db.json node server.js
 ## Input validation
 - Invalid JSON requests return `400 Invalid JSON payload`.
 - Invalid meal or water payloads return `400` with a clear error message.
+
+
+## If old UI is still showing
+- Stop old Node server processes and start again: `npm start`
+- Open `http://localhost:4173` (not a different port)
+- Hard refresh browser (`Ctrl+Shift+R` / `Cmd+Shift+R`)
+- App now serves static files with `Cache-Control: no-store` to prevent stale UI cache
+
+
+## GitHub clone/push error fix (`Failed to connect to github.com port 443`)
+If you hit connectivity/auth errors while cloning or pushing, run:
+
+```bash
+bash scripts/github-network-diagnose.sh
+```
+
+Then apply the recommended fix from the script output:
+- remove broken git proxy config
+- ensure outbound 443 is allowed
+- use **SSH** or **PAT** (GitHub password auth is not supported)
+
+Quick SSH setup:
+```bash
+git remote set-url origin git@github.com:Namanagarwal172/Calorie.git
+ssh -T git@github.com
+git push -u origin main
+```
+
+
+## npm EJSONPARSE fix (`package.json` parse error)
+If you see:
+- `npm ERR! code EJSONPARSE`
+- `package.json must be actual JSON`
+
+Run:
+```bash
+bash scripts/fix-package-json.sh
+npm install
+npm test
+```
+
+Or replace `package.json` with this exact valid JSON:
+```json
+{
+  "name": "health-ai-india",
+  "version": "1.0.0",
+  "description": "Full-stack Health AI calorie tracker for Indian users",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "node --test"
+  },
+  "license": "MIT"
+}
+```
 ## Preview option
 In the **AI Meal Scan** card:
 1. Upload meal photo and enter note.

@@ -9,6 +9,9 @@ const els = {
   emailField: document.getElementById('emailField'),
   authForm: document.getElementById('authForm'),
   logoutBtn: document.getElementById('logoutBtn'),
+  googleLogin: document.getElementById('googleLogin'),
+  appleLogin: document.getElementById('appleLogin'),
+  authError: document.getElementById('authError'),
 
   scanForm: document.getElementById('scanForm'),
   previewScan: document.getElementById('previewScan'),
@@ -41,6 +44,26 @@ const els = {
 
 let pendingScanEstimate = null;
 let authMode = 'mobile';
+let memoryAuth = false;
+
+function isLoggedIn() {
+  try {
+    const val = localStorage.getItem(AUTH_KEY);
+    return val === '1' || memoryAuth;
+  } catch {
+    return memoryAuth;
+  }
+}
+
+function setLoggedIn(flag) {
+  memoryAuth = Boolean(flag);
+  try {
+    if (flag) localStorage.setItem(AUTH_KEY, '1');
+    else localStorage.removeItem(AUTH_KEY);
+  } catch {
+    // Safari private mode or storage restrictions
+  }
+}
 const els = {
   profileForm: document.getElementById('profileForm'),
   manualForm: document.getElementById('manualForm'),
@@ -90,6 +113,7 @@ function estimateMealCost(meal) {
 }
 
 function updateAuthUI() {
+  const loggedIn = isLoggedIn();
   const loggedIn = localStorage.getItem(AUTH_KEY) === '1';
   els.authView.classList.toggle('hidden', loggedIn);
   els.appView.classList.toggle('hidden', !loggedIn);
@@ -107,10 +131,40 @@ function setMode(mode) {
 els.tabMobile.addEventListener('click', () => setMode('mobile'));
 els.tabEmail.addEventListener('click', () => setMode('email'));
 
+els.googleLogin?.addEventListener('click', () => {
+  if (els.authError) els.authError.textContent = '';
+  setLoggedIn(true);
+  updateAuthUI();
+  refresh().catch(showError);
+});
+
+els.appleLogin?.addEventListener('click', () => {
+  if (els.authError) els.authError.textContent = '';
+  setLoggedIn(true);
+  updateAuthUI();
+  refresh().catch(showError);
+});
+
+
 els.authForm.addEventListener('submit', (e) => {
   e.preventDefault();
   const f = new FormData(e.target);
   const value = authMode === 'mobile' ? String(f.get('mobile') || '').trim() : String(f.get('email') || '').trim();
+  if (!value) {
+    if (els.authError) els.authError.textContent = `Please enter your ${authMode}.`;
+    return;
+  }
+  if (els.authError) els.authError.textContent = '';
+  setLoggedIn(true);
+  updateAuthUI();
+  refresh().catch((err) => {
+    showError(err);
+    if (els.authError) els.authError.textContent = 'Logged in, but unable to load dashboard. Check server and refresh.';
+  });
+});
+
+els.logoutBtn.addEventListener('click', () => {
+  setLoggedIn(false);
   if (!value) return;
   localStorage.setItem(AUTH_KEY, '1');
   updateAuthUI();
