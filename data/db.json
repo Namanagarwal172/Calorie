@@ -1,0 +1,13 @@
+{
+  "profile": {
+    "name": "Guest",
+    "city": "Bengaluru",
+    "calorieTarget": 2200,
+    "proteinGoal": 120,
+    "carbGoal": 260,
+    "fatGoal": 70,
+    "budgetInr": 300
+  },
+  "meals": [],
+  "waterByDate": {}
+}
