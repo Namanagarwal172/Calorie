@@ -1,46 +1,256 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Health AI App</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Health AI India</title>
+  <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
-    <header>
-        <h1>Welcome to Health AI</h1>
-        <nav>
-            <ul>
-                <li><a href="#">Home</a></li>
-                <li><a href="#">About</a></li>
-                <li><a href="#">Services</a></li>
-                <li><a href="#">Contact</a></li>
-            </ul>
-        </nav>
-    </header>
-    <main>
-        <section class="hero">
-            <h2>Your Health, Our Priority</h2>
-            <p>Get personalized insights and recommendations for a healthier you.</p>
-            <button>Get Started</button>
-        </section>
-        <section class="features">
-            <article>
-                <h3>Feature 1</h3>
-                <p>Description of feature 1.</p>
-            </article>
-            <article>
-                <h3>Feature 2</h3>
-                <p>Description of feature 2.</p>
-            </article>
-            <article>
-                <h3>Feature 3</h3>
-                <p>Description of feature 3.</p>
-            </article>
-        </section>
-    </main>
-    <footer>
-        <p>&copy; 2026 Health AI. All Rights Reserved.</p>
-    </footer>
+  <div class="app-bg"></div>
+  <main class="app-root">
+    <section id="authView" class="screen">
+      <div class="glass-card center">
+        <p class="small muted">Health AI India</p>
+        <h1 class="brand">Track smarter. Eat better.</h1>
+        <p class="muted">A calorie tracker with Indian meals, quick scan, and simple daily coaching.</p>
+      </div>
+
+      <div class="glass-card stack">
+        <div class="segmented">
+          <button id="tabMobile" type="button" class="tab active">Mobile</button>
+          <button id="tabEmail" type="button" class="tab">Email</button>
+        </div>
+
+        <form id="authForm" class="stack">
+          <label id="mobileField">
+            Mobile number
+            <input type="text" name="mobile" placeholder="9876543210">
+          </label>
+
+          <label id="emailField" class="hidden">
+            Email address
+            <input type="email" name="email" placeholder="you@example.com">
+          </label>
+
+          <label id="otpField" class="hidden">
+            OTP
+            <input id="otpInput" type="text" placeholder="Enter demo OTP">
+          </label>
+
+          <button id="continueBtn" type="submit" class="btn gradient">Send OTP</button>
+          <button id="verifyOtpBtn" type="button" class="btn hidden">Verify OTP</button>
+          <p id="authError" class="small muted"></p>
+        </form>
+
+        <div class="social-row">
+          <button id="googleLogin" type="button" class="btn">Continue with Google</button>
+          <button id="appleLogin" type="button" class="btn">Continue with Apple</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="appView" class="screen hidden">
+      <div class="glass-card top-head">
+        <div>
+          <p class="small muted">Dashboard</p>
+          <h1 id="greeting">Welcome</h1>
+          <p id="kcalLine" class="muted">Loading your plan...</p>
+        </div>
+        <div class="streak-pill">Streak <span id="streakCount">1</span></div>
+      </div>
+
+      <div class="ring-grid">
+        <div class="glass-card ring-card">
+          <h3>Calories</h3>
+          <div class="ring-wrap">
+            <div id="ringCalories" class="ring"></div>
+            <span id="ringCaloriesText">0/0</span>
+          </div>
+        </div>
+        <div class="glass-card ring-card">
+          <h3>Protein</h3>
+          <div class="ring-wrap">
+            <div id="ringProtein" class="ring"></div>
+            <span id="ringProteinText">0/0g</span>
+          </div>
+        </div>
+        <div class="glass-card ring-card">
+          <h3>Carbs</h3>
+          <div class="ring-wrap">
+            <div id="ringCarbs" class="ring"></div>
+            <span id="ringCarbsText">0/0g</span>
+          </div>
+        </div>
+        <div class="glass-card ring-card">
+          <h3>Water</h3>
+          <div class="ring-wrap">
+            <div id="ringWater" class="ring"></div>
+            <span id="ringWaterText">0ml</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card stack">
+        <h3>Budget tracker</h3>
+        <div class="grid-2">
+          <div class="content-box">
+            <div class="small muted">Spent today</div>
+            <strong id="spentInr">Rs0</strong>
+          </div>
+          <div class="content-box">
+            <div class="small muted">Remaining</div>
+            <strong id="remainingInr">Rs0</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card stack">
+        <h3>AI meal scan</h3>
+        <form id="scanForm" class="stack">
+          <label>
+            Meal photo
+            <input type="file" name="image" accept="image/*">
+          </label>
+          <label>
+            Meal note
+            <input type="text" name="note" placeholder="paneer roti dinner">
+          </label>
+          <label>
+            Meal type
+            <select name="mealType">
+              <option>Breakfast</option>
+              <option>Lunch</option>
+              <option>Dinner</option>
+              <option>Snack</option>
+            </select>
+          </label>
+          <div class="action-row">
+            <button id="previewScan" type="button" class="btn">Preview Estimate</button>
+            <button id="addFromPreview" type="submit" class="btn gradient" disabled>Add From Preview</button>
+          </div>
+          <div id="scanResult" class="result-box muted">Upload a meal image and add a note to preview.</div>
+        </form>
+      </div>
+
+      <div class="glass-card stack">
+        <h3>Manual meal entry</h3>
+        <form id="manualForm" class="stack">
+          <div class="grid-2">
+            <label>
+              Meal name
+              <input type="text" name="name" placeholder="Idli Sambar">
+            </label>
+            <label>
+              Meal type
+              <select name="mealType">
+                <option>Breakfast</option>
+                <option>Lunch</option>
+                <option>Dinner</option>
+                <option>Snack</option>
+              </select>
+            </label>
+          </div>
+          <div class="grid-2">
+            <label>
+              Calories
+              <input type="number" name="calories" min="0" placeholder="320">
+            </label>
+            <label>
+              Protein
+              <input type="number" name="protein" min="0" placeholder="12">
+            </label>
+          </div>
+          <div class="grid-2">
+            <label>
+              Carbs
+              <input type="number" name="carbs" min="0" placeholder="48">
+            </label>
+            <label>
+              Fat
+              <input type="number" name="fat" min="0" placeholder="8">
+            </label>
+          </div>
+          <button type="submit" class="btn gradient">Add meal</button>
+        </form>
+      </div>
+
+      <div class="glass-card stack">
+        <h3>Barcode quick add</h3>
+        <form id="barcodeForm" class="stack">
+          <label>
+            Barcode
+            <input type="text" name="code" placeholder="890123">
+          </label>
+          <button type="submit" class="btn">Add product</button>
+          <p id="barcodeStatus" class="small muted"></p>
+        </form>
+      </div>
+
+      <div class="glass-card stack">
+        <h3>AI coach</h3>
+        <div id="chatBox" class="result-box muted">Ask about protein, meals, diet plans, or healthy breakfast ideas.</div>
+        <div class="grid-2">
+          <input id="chatInput" type="text" placeholder="How much protein should I eat?">
+          <button id="chatSend" type="button" class="btn">Send</button>
+        </div>
+        <div class="action-row">
+          <button id="voiceBtn" type="button" class="btn">Voice ask</button>
+          <button id="scanPhotoBtn" type="button" class="btn">Photo scan tip</button>
+        </div>
+      </div>
+
+      <div class="glass-card stack">
+        <h3>Diet plan</h3>
+        <form id="dietForm" class="stack">
+          <div class="grid-2">
+            <label>
+              Weight (kg)
+              <input type="number" name="weight" min="1" placeholder="70">
+            </label>
+            <label>
+              Daily budget
+              <input type="number" name="budget" min="0" placeholder="300">
+            </label>
+          </div>
+          <label>
+            Goal
+            <select name="goal">
+              <option value="fat_loss">Fat loss</option>
+              <option value="maintenance">Maintenance</option>
+              <option value="muscle_gain">Muscle gain</option>
+            </select>
+          </label>
+          <button type="submit" class="btn">Generate plan</button>
+        </form>
+        <div id="dietPlanBox" class="result-box muted">Build a simple diet plan from your goal and budget.</div>
+      </div>
+
+      <div class="glass-card stack">
+        <h3>Weekly analytics</h3>
+        <button id="loadWeekly" type="button" class="btn">Load analytics</button>
+        <div id="weeklyBox" class="result-box muted">Your weekly calorie trend will appear here.</div>
+      </div>
+
+      <div class="glass-card stack">
+        <h3>Today timeline</h3>
+        <ul id="mealList" class="meal-list">
+          <li class="muted">No meals logged yet.</li>
+        </ul>
+      </div>
+
+      <div class="glass-card stack">
+        <h3>AI insights</h3>
+        <div id="insights" class="result-box muted">Loading insights...</div>
+      </div>
+
+      <div class="bottom-nav">
+        <button id="addWater" type="button" class="btn">+250 ml water</button>
+        <button id="logoutBtn" type="button" class="btn">Logout</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="/app.js"></script>
 </body>
 </html>

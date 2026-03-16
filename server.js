@@ -7,10 +7,6 @@ const PORT = Number(process.env.PORT || 4173);
 const ROOT = __dirname;
 const DATA_DIR = path.join(ROOT, 'data');
 const DB_FILE = process.env.DB_FILE || path.join(DATA_DIR, 'db.json');
-const PORT = process.env.PORT || 4173;
-const ROOT = __dirname;
-const DATA_DIR = path.join(ROOT, 'data');
-const DB_FILE = path.join(DATA_DIR, 'db.json');
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',
@@ -51,16 +47,6 @@ function ensureDb() {
   const dir = path.dirname(DB_FILE);
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
   if (!fs.existsSync(DB_FILE)) fs.writeFileSync(DB_FILE, JSON.stringify(seedDb(), null, 2));
-function ensureDb() {
-  if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
-  if (!fs.existsSync(DB_FILE)) {
-    const seed = {
-      profile: { name: 'Guest', city: 'Bengaluru', calorieTarget: 2200, proteinGoal: 120, carbGoal: 260, fatGoal: 70, budgetInr: 300 },
-      meals: [],
-      waterByDate: {},
-    };
-    fs.writeFileSync(DB_FILE, JSON.stringify(seed, null, 2));
-  }
 }
 
 function dbRead() {
@@ -74,32 +60,30 @@ function dbWrite(db) {
 
 function send(res, status, payload, headers = {}) {
   let body = payload;
-  if (!Buffer.isBuffer(payload) && typeof payload !== 'string') body = JSON.stringify(payload);
   if (!Buffer.isBuffer(payload) && typeof payload !== 'string') {
     body = JSON.stringify(payload);
   }
-  res.writeHead(status, { 'Content-Type': headers['Content-Type'] || 'application/json; charset=utf-8', ...headers });
+  res.writeHead(status, {
+    'Content-Type': headers['Content-Type'] || 'application/json; charset=utf-8',
+    ...headers,
+  });
   res.end(body);
 }
 
 function parseBody(req) {
   return new Promise((resolve, reject) => {
     let raw = '';
-    req.on('data', chunk => {
+    req.on('data', (chunk) => {
       raw += chunk;
       if (raw.length > 1e6) req.destroy();
     });
     req.on('end', () => {
       if (!raw) return resolve({});
       try {
-        resolve(JSON.parse(raw));
-      } catch (e) {
-        reject(e);
+        return resolve(JSON.parse(raw));
+      } catch (error) {
+        return reject(error);
       }
-    req.on('data', chunk => { raw += chunk; if (raw.length > 1e6) req.destroy(); });
-    req.on('end', () => {
-      if (!raw) return resolve({});
-      try { resolve(JSON.parse(raw)); } catch (e) { reject(e); }
     });
     req.on('error', reject);
   });
@@ -127,18 +111,6 @@ function totalsForDate(db, key = dateKey()) {
     },
     { calories: 0, protein: 0, carbs: 0, fat: 0, count: 0 }
   );
-function isSameDate(iso, key) { return dateKey(iso) === key; }
-
-function totalsForDate(db, key = dateKey()) {
-  const todayMeals = db.meals.filter(m => isSameDate(m.date, key));
-  return todayMeals.reduce((acc, m) => {
-    acc.calories += Number(m.calories || 0);
-    acc.protein += Number(m.protein || 0);
-    acc.carbs += Number(m.carbs || 0);
-    acc.fat += Number(m.fat || 0);
-    acc.count += 1;
-    return acc;
-  }, { calories: 0, protein: 0, carbs: 0, fat: 0, count: 0 });
 }
 
 function estimateFromText(text = '') {
@@ -156,24 +128,23 @@ function estimateFromText(text = '') {
 }
 
 function buildInsights(db, totals) {
-  const p = db.profile;
+  const profile = db.profile;
   const water = db.waterByDate[dateKey()] || 0;
   const messages = [];
-  const kcalPct = Math.round((totals.calories / p.calorieTarget) * 100 || 0);
+  const kcalPct = Math.round((totals.calories / profile.calorieTarget) * 100 || 0);
   messages.push(`Aapne aaj ${kcalPct}% calorie target complete kiya.`);
-  if (totals.protein < p.proteinGoal) {
-    messages.push(`Protein ${p.proteinGoal - totals.protein}g kam hai. Add: paneer, curd, egg ya sprouts.`);
+  if (totals.protein < profile.proteinGoal) {
+    messages.push(`Protein ${profile.proteinGoal - totals.protein}g kam hai. Add: paneer, curd, egg ya sprouts.`);
   } else {
     messages.push('Protein goal achieved. Bahut badhiya!');
   }
-  if (totals.protein < p.proteinGoal) messages.push(`Protein ${p.proteinGoal - totals.protein}g kam hai. Add: paneer, curd, egg ya sprouts.`);
-  else messages.push('Protein goal achieved. Bahut badhiya!');
-  if (water < 2500) messages.push(`Hydration reminder: ${2500 - water}ml paani aur piyen.`);
-  const budgetPerMeal = Math.round((p.budgetInr || 300) / 3);
-  messages.push(`Smart budget tip: har meal ~₹${budgetPerMeal} ke andar rakhein for sustainable diet.`);
+  if (water < 2500) {
+    messages.push(`Hydration reminder: ${2500 - water}ml paani aur piyen.`);
+  }
+  const budgetPerMeal = Math.round((profile.budgetInr || 300) / 3);
+  messages.push(`Smart budget tip: har meal ~Rs${budgetPerMeal} ke andar rakhein for sustainable diet.`);
   return messages;
 }
-
 
 function toNumber(value, fallback = 0) {
   const n = Number(value);
@@ -210,6 +181,7 @@ function validateProfileInput(body) {
   }
   return null;
 }
+
 function normalizeMeal(body) {
   return {
     id: randomUUID(),
@@ -223,7 +195,6 @@ function normalizeMeal(body) {
     source: String(body.source || 'Manual'),
   };
 }
-
 
 function chatbotReply(message = '') {
   const m = String(message).toLowerCase();
@@ -272,19 +243,18 @@ function weeklyAnalytics() {
 }
 
 function serveStatic(res, pathname) {
-function serveStatic(res, pathname) {
-function serveStatic(req, res, pathname) {
   const filePath = pathname === '/' ? path.join(ROOT, 'index.html') : path.join(ROOT, pathname);
-  if (!filePath.startsWith(ROOT)) return send(res, 403, 'Forbidden', { 'Content-Type': 'text/plain' });
-  fs.readFile(filePath, (err, data) => {
+  if (!filePath.startsWith(ROOT)) {
+    return send(res, 403, 'Forbidden', { 'Content-Type': 'text/plain' });
+  }
+  return fs.readFile(filePath, (err, data) => {
     if (err) return send(res, 404, 'Not Found', { 'Content-Type': 'text/plain' });
-    send(res, 200, data, {
+    return send(res, 200, data, {
       'Content-Type': MIME[path.extname(filePath)] || 'application/octet-stream',
       'Cache-Control': 'no-store, no-cache, must-revalidate',
       Pragma: 'no-cache',
       Expires: '0',
     });
-    send(res, 200, data, { 'Content-Type': MIME[path.extname(filePath)] || 'application/octet-stream' });
   });
 }
 
@@ -308,6 +278,7 @@ function createServer() {
           otpRequired: true,
           otp,
           loginId,
+          token: 'demo-token',
         });
       }
 
@@ -317,7 +288,6 @@ function createServer() {
         if (!session) return send(res, 400, { error: 'Invalid login session' });
         if (String(body.otp || '') !== session.otp) return send(res, 400, { error: 'Invalid OTP' });
         loginSessions.delete(String(body.loginId));
-        if (!body.email && !body.mobile) return send(res, 400, { error: 'Email or mobile required' });
         return send(res, 200, { message: 'Login successful', token: 'demo-token' });
       }
 
@@ -339,7 +309,9 @@ function createServer() {
         return send(res, 200, generateDietPlan(body.weight, body.goal, body.budget));
       }
 
-      if (pathname === '/api/profile' && req.method === 'GET') return send(res, 200, dbRead().profile);
+      if (pathname === '/api/profile' && req.method === 'GET') {
+        return send(res, 200, dbRead().profile);
+      }
 
       if (pathname === '/api/profile' && req.method === 'POST') {
         const body = await parseBody(req);
@@ -391,13 +363,14 @@ function createServer() {
         const body = await parseBody(req);
         const text = `${body.fileName || ''} ${body.note || ''} ${body.food || ''}`;
         return send(res, 200, estimateFromText(text));
-        return send(res, 200, estimateFromText(`${body.fileName || ''} ${body.note || ''}`));
       }
 
       if (pathname === '/api/water/add' && req.method === 'POST') {
         const body = await parseBody(req);
         const amount = toNumber(body.amount ?? 250, NaN);
-        if (!Number.isFinite(amount) || amount <= 0) return send(res, 400, { error: 'amount must be a positive number' });
+        if (!Number.isFinite(amount) || amount <= 0) {
+          return send(res, 400, { error: 'amount must be a positive number' });
+        }
         const db = dbRead();
         const key = dateKey();
         db.waterByDate[key] = (db.waterByDate[key] || 0) + amount;
@@ -433,86 +406,3 @@ function startServer() {
 if (require.main === module) startServer();
 
 module.exports = { createServer, startServer, estimateFromText, totalsForDate, buildInsights, dateKey };
-const server = http.createServer(async (req, res) => {
-  const url = new URL(req.url, `http://${req.headers.host}`);
-  const pathname = url.pathname;
-
-  try {
-    if (pathname === '/api/profile' && req.method === 'GET') {
-      return send(res, 200, dbRead().profile);
-    }
-    if (pathname === '/api/profile' && req.method === 'POST') {
-      const body = await parseBody(req);
-      const db = dbRead();
-      db.profile = { ...db.profile, ...body };
-      dbWrite(db);
-      return send(res, 200, db.profile);
-    }
-
-    if (pathname === '/api/meals' && req.method === 'GET') {
-      const db = dbRead();
-      const key = url.searchParams.get('date') || dateKey();
-      return send(res, 200, db.meals.filter(m => isSameDate(m.date, key)));
-    }
-    if (pathname === '/api/meals' && req.method === 'POST') {
-      const body = await parseBody(req);
-      const db = dbRead();
-      const meal = { id: randomUUID(), date: new Date().toISOString(), ...body };
-      db.meals.unshift(meal);
-      dbWrite(db);
-      return send(res, 201, meal);
-    }
-
-    if (pathname.startsWith('/api/meals/') && req.method === 'DELETE') {
-      const id = pathname.split('/').pop();
-      const db = dbRead();
-      db.meals = db.meals.filter(m => m.id !== id);
-      dbWrite(db);
-      return send(res, 200, { ok: true });
-    }
-
-    if (pathname === '/api/barcode' && req.method === 'POST') {
-      const body = await parseBody(req);
-      const item = barcodeDb[String(body.code || '').trim()];
-      if (!item) return send(res, 404, { error: 'Barcode not found' });
-      const db = dbRead();
-      const meal = { id: randomUUID(), date: new Date().toISOString(), ...item, source: 'Barcode' };
-      db.meals.unshift(meal);
-      dbWrite(db);
-      return send(res, 201, meal);
-    }
-
-    if (pathname === '/api/scan' && req.method === 'POST') {
-      const body = await parseBody(req);
-      const estimate = estimateFromText(`${body.fileName || ''} ${body.note || ''}`);
-      return send(res, 200, estimate);
-    }
-
-    if (pathname === '/api/water/add' && req.method === 'POST') {
-      const body = await parseBody(req);
-      const db = dbRead();
-      const key = dateKey();
-      db.waterByDate[key] = (db.waterByDate[key] || 0) + Number(body.amount || 250);
-      dbWrite(db);
-      return send(res, 200, { date: key, waterMl: db.waterByDate[key] });
-    }
-
-    if (pathname === '/api/dashboard' && req.method === 'GET') {
-      const db = dbRead();
-      const totals = totalsForDate(db);
-      const waterMl = db.waterByDate[dateKey()] || 0;
-      const insights = buildInsights(db, totals);
-      return send(res, 200, { profile: db.profile, totals, waterMl, insights });
-    }
-
-    if (pathname.startsWith('/api/')) return send(res, 404, { error: 'Not found' });
-    return serveStatic(req, res, pathname);
-  } catch (error) {
-    return send(res, 500, { error: 'Server error', detail: error.message });
-  }
-});
-
-server.listen(PORT, () => {
-  ensureDb();
-  console.log(`Health AI server running on http://localhost:${PORT}`);
-});
