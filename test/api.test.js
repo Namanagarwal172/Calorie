@@ -190,4 +190,5 @@ test('scan-photo and login endpoints work', async () => {
   assert.equal(verifyRes.status, 200);
   const verified = await verifyRes.json();
   assert.equal(verified.token, 'demo-token');
+  assert.equal(login.token, 'demo-token');
 });
